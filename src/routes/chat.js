@@ -11,7 +11,12 @@ router.use(async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Failed to initialize Qdrant client for chat route:", error);
-    res.status(500).json({ success: false, error: "Failed to initialize chat service." });
+    res.status(500).json({
+      success: false,
+      error: "Failed to initialize chat service.",
+      details: error.message,
+      hint: "Check QDRANT_URL and QDRANT_API_KEY environment variables"
+    });
   }
 });
 
