@@ -53,26 +53,16 @@ export const useApiConfig = () => {
 export const getApiBaseUrl = () => {
   // Check if we're in browser
   if (typeof window !== 'undefined') {
-    // Priority 1: Explicitly set in Docusaurus config
-    const configUrl = window.docusaurus?.siteConfig?.customFields?.apiBaseUrl;
-    if (configUrl !== undefined && configUrl !== null) {
-      console.log('🔗 API Base URL from config:', configUrl || '(empty - using relative URLs)');
-      return configUrl;
+    // Try to get from window object (set by Docusaurus)
+    if (window.docusaurus?.siteConfig?.customFields?.apiBaseUrl) {
+      return window.docusaurus.siteConfig.customFields.apiBaseUrl;
     }
-
-    // Priority 2: Auto-detect Vercel production
-    if (window.location.hostname.includes('vercel.app')) {
-      console.log('🔗 API Base URL: Vercel detected, using relative URLs');
-      return '';  // Same domain - use relative URLs
-    }
-
-    // Priority 3: Localhost development
-    console.log('🔗 API Base URL: Using localhost for development');
+    // Fallback to localhost for development
     return 'http://localhost:3001';
   }
 
-  // Server-side or build-time
-  return '';
+  // Server-side or build-time - this won't execute in browser
+  return 'http://localhost:3001';
 };
 
 /**

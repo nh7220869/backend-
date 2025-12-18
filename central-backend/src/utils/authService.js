@@ -7,6 +7,7 @@ export const initializeAuth = (databasePool) => {
   }
 
   const auth = betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app/',
     database: databasePool, // Use the shared database pool
     emailAndPassword: {
       enabled: true,
@@ -19,6 +20,12 @@ export const initializeAuth = (databasePool) => {
         enabled: true,
         maxAge: 60 * 5, // 5 minutes
       },
+    },
+    advanced: {
+      crossSubDomainCookies: {
+        enabled: true,
+      },
+      useSecureCookies: process.env.NODE_ENV === 'production',
     },
     user: {
       additionalFields: {
