@@ -29,6 +29,7 @@ const config = {
       'https://Ai-Native-Book.vercel.app',
       'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
       'http://localhost:3000',
+      "https://ai-native-book-tf39.vercel.app/"
       'http://localhost:5001'
     ],
   }
