@@ -7,7 +7,7 @@ export const initializeAuth = (databasePool) => {
   }
 
   const auth = betterAuth({
-    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+    baseURL: process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app/',
     database: databasePool, // Use the shared database pool
     emailAndPassword: {
       enabled: true,

@@ -12,32 +12,47 @@ const EMBEDDING_MODEL = config.openRouter.embeddingModel; // Assuming OpenRouter
 
 const initializeQdrantClient = async () => {
   if (qdrantClient) {
+    console.log('✅ Qdrant client already initialized');
     return qdrantClient;
+  }
+
+  console.log('🔍 Initializing Qdrant client...');
+  console.log('📍 Qdrant URL:', qdrantConfig.url || 'NOT SET');
+  console.log('🔑 Qdrant API Key:', qdrantConfig.apiKey ? '***' + qdrantConfig.apiKey.slice(-4) : 'NOT SET');
+
+  if (!qdrantConfig.url) {
+    throw new Error('QDRANT_URL environment variable is not set');
+  }
+
+  if (!qdrantConfig.apiKey) {
+    throw new Error('QDRANT_API_KEY environment variable is not set');
   }
 
   qdrantClient = new QdrantClient({
     url: qdrantConfig.url,
-    apiKey: qdrantConfig.apiKey, // Use API key if provided
+    apiKey: qdrantConfig.apiKey,
   });
 
   try {
+    console.log('📡 Connecting to Qdrant...');
     const collections = await qdrantClient.getCollections();
     const collectionExists = collections.collections.some(c => c.name === QDRANT_COLLECTION_NAME);
 
     if (!collectionExists) {
-      console.log(`Collection '${QDRANT_COLLECTION_NAME}' does not exist. Creating...`);
+      console.log(`⚠️ Collection '${QDRANT_COLLECTION_NAME}' does not exist. Creating...`);
       await qdrantClient.createCollection(QDRANT_COLLECTION_NAME, {
-        vectors: { size: 1536, distance: 'Cosine' }, // OpenAI embeddings typically have 1536 dimensions, assuming compatibility
+        vectors: { size: 1536, distance: 'Cosine' },
       });
-      console.log(`Collection '${QDRANT_COLLECTION_NAME}' created.`);
+      console.log(`✅ Collection '${QDRANT_COLLECTION_NAME}' created.`);
     } else {
-      console.log(`Collection '${QDRANT_COLLECTION_NAME}' already exists.`);
+      console.log(`✅ Collection '${QDRANT_COLLECTION_NAME}' already exists.`);
     }
     return qdrantClient;
   } catch (error) {
-    console.error('Failed to initialize Qdrant client or collection:', error);
+    console.error('❌ Failed to initialize Qdrant client:', error.message);
+    console.error('Stack:', error.stack);
     qdrantClient = null;
-    throw error;
+    throw new Error(`Qdrant initialization failed: ${error.message}`);
   }
 };
 
