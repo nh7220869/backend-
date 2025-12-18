@@ -1,5 +1,5 @@
-const express = require('express');
-const cors = require('cors');
+import express, { json } from 'express';
+import cors from 'cors';
 
 const app = express();
 
@@ -8,7 +8,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(json());
 
 app.get('/get-session', (req, res) => {
   res.json({ success: true, message: 'CORS fixed!' });
