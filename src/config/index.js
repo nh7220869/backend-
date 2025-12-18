@@ -25,12 +25,12 @@ const config = {
     collectionName: process.env.QDRANT_COLLECTION_NAME || 'book_content',
   },
   cors: {
-    allowedOrigins: process.env.CORS_ALLOWED_ORIGINS ?
-      process.env.CORS_ALLOWED_ORIGINS.split(',') : [
-        'https://humanoid-robotics-guidemain.vercel.app',
-        'http://localhost:3000',
-        'http://localhost:3001',
-      ],
+    allowedOrigins: process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : [
+      'https://Ai-Native-Book.vercel.app',
+      'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5001'
+    ],
   }
 };
 

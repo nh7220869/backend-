@@ -20,6 +20,12 @@ export const initializeAuth = (databasePool) => {
         maxAge: 60 * 5, // 5 minutes
       },
     },
+    advanced: {
+      crossSubDomainCookies: {
+        enabled: true,
+      },
+      useSecureCookies: process.env.NODE_ENV === 'production',
+    },
     user: {
       additionalFields: {
         softwareBackground: {
