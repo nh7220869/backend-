@@ -10,7 +10,7 @@ app.use(cors({
 
 app.use(json());
 
-app.get('/get-session', (req, res) => {
+app.get('/session', (req, res) => {
   res.json({ success: true, message: 'CORS fixed!' });
 });
 
