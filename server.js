@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load env (safe for both local & Vercel)
+// Note: config/index.js also loads .env, which runs first due to import order
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const PORT = process.env.PORT || 3001;

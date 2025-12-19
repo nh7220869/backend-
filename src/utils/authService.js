@@ -6,8 +6,18 @@ export const initializeAuth = (databasePool) => {
     throw new Error('Database pool must be initialized before calling initializeAuth.');
   }
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const baseURL = process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app';
+
+  console.log('🔐 Auth Config:', {
+    baseURL,
+    isProduction,
+    trustedOrigins: config.cors.allowedOrigins,
+    hasSecret: !!process.env.BETTER_AUTH_SECRET
+  });
+
   const auth = betterAuth({
-    baseURL: process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app',
+    baseURL,
     database: databasePool, // Use the shared database pool
     emailAndPassword: {
       enabled: true,
@@ -25,7 +35,9 @@ export const initializeAuth = (databasePool) => {
       crossSubDomainCookies: {
         enabled: true,
       },
-      useSecureCookies: process.env.NODE_ENV === 'production',
+      useSecureCookies: isProduction,
+      // Important for Vercel serverless
+      generateId: () => crypto.randomUUID(),
     },
     user: {
       additionalFields: {

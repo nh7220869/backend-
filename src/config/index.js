@@ -5,8 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env from project root
-dotenv.config({ path: path.join(__dirname, '..', '..', '..', '.env') });
+// Load .env from project root (central-backend/.env)
+// __dirname is central-backend/src/config, so go up 2 levels
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const config = {
   port: process.env.CENTRAL_BACKEND_PORT || 3000,
