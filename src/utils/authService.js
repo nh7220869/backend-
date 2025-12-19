@@ -43,15 +43,22 @@ export const initializeAuth = (databasePool) => {
       },
     },
     advanced: {
-      // Only use secure cookies in production on Vercel
+      // Use secure cookies in production (required for SameSite=None)
       useSecureCookies: isProduction && isVercel,
       // Important for Vercel serverless
       generateId: () => crypto.randomUUID(),
       // Cookie settings for cross-origin requests
       cookies: {
-        // sameSite: 'lax' works for localhost cross-port requests
-        // On production with HTTPS, this will work fine too
+        // SameSite=None is required for cross-origin cookie sharing
+        // Must be used with Secure=true in production
         sameSite: isProduction && isVercel ? 'none' : 'lax',
+        // Explicitly set domain to allow subdomain sharing if needed
+        // For cross-origin, leave undefined to let browser handle it
+        domain: undefined,
+        // Set path to root
+        path: '/',
+        // HttpOnly for security (prevents JavaScript access)
+        httpOnly: true,
       },
     },
     user: {

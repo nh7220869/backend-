@@ -16,6 +16,34 @@ const createAuthRouter = (auth) => {
     });
   });
 
+  // Custom get-session endpoint with proper JSON structure
+  router.get('/get-session', async (req, res) => {
+    try {
+      const session = await auth.api.getSession({ headers: req.headers });
+
+      if (!session) {
+        return res.json({
+          success: false,
+          session: null,
+          message: 'No session found'
+        });
+      }
+
+      return res.json({
+        success: true,
+        session: session
+      });
+    } catch (error) {
+      console.error('Error getting session:', error);
+      return res.status(500).json({
+        success: false,
+        session: null,
+        message: 'Error retrieving session',
+        error: error.message
+      });
+    }
+  });
+
   // Better Auth handler - handles all /api/auth/* routes
   router.all('/*', toNodeHandler(auth));
 

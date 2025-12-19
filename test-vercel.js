@@ -154,7 +154,7 @@ async function testSignIn(credentials) {
 async function testSessionAuthenticated() {
   logSection('6. Session (Authenticated)');
 
-  const result = await makeRequest('/api/auth/get-session');
+  const result = await makeRequest('/api/auth/session');
 
   if (result.data?.user && result.data?.session) {
     log('  ✓ Successfully retrieved authenticated session!', 'green');
