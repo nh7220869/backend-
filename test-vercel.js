@@ -87,7 +87,7 @@ async function testAuthHealth() {
 
 async function testSessionUnauthenticated() {
   logSection('3. Session (Unauthenticated)');
-  const result = await makeRequest('/api/auth/session');
+  const result = await makeRequest('/api/auth/get-session');
 
   if (result.data?.user === null && result.data?.session === null) {
     log('  ✓ Correctly returns null session when not logged in', 'green');
@@ -154,7 +154,7 @@ async function testSignIn(credentials) {
 async function testSessionAuthenticated() {
   logSection('6. Session (Authenticated)');
 
-  const result = await makeRequest('/api/auth/session');
+  const result = await makeRequest('/api/auth/get-session');
 
   if (result.data?.user && result.data?.session) {
     log('  ✓ Successfully retrieved authenticated session!', 'green');
