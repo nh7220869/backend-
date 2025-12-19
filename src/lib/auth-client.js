@@ -7,6 +7,14 @@ export const authClient = createAuthClient({
   baseURL: getApiBaseUrl(),
   fetchOptions: {
     credentials: 'include',
+    // CRITICAL: Prevent 304 Not Modified responses
+    // Force fresh data on every request to avoid stale session state
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
   },
 });
 

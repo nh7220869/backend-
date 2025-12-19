@@ -19,6 +19,12 @@ const createAuthRouter = (auth) => {
   // Custom get-session endpoint with proper JSON structure
   router.get('/get-session', async (req, res) => {
     try {
+      // CRITICAL: Prevent 304 Not Modified caching
+      // Session data must ALWAYS be fresh to avoid stale authentication state
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       const session = await auth.api.getSession({ headers: req.headers });
 
       if (!session) {
