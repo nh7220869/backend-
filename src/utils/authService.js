@@ -7,11 +7,22 @@ export const initializeAuth = (databasePool) => {
   }
 
   const isProduction = process.env.NODE_ENV === 'production';
-  const baseURL = process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app';
+  const isVercel = process.env.VERCEL === '1';
+
+  // Set baseURL based on environment
+  let baseURL;
+  if (isVercel) {
+    // On Vercel, use the production URL
+    baseURL = process.env.BETTER_AUTH_URL || 'https://backend-jada-radta.vercel.app';
+  } else {
+    // Local development
+    baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3001';
+  }
 
   console.log('🔐 Auth Config:', {
     baseURL,
     isProduction,
+    isVercel,
     trustedOrigins: config.cors.allowedOrigins,
     hasSecret: !!process.env.BETTER_AUTH_SECRET
   });
@@ -32,12 +43,16 @@ export const initializeAuth = (databasePool) => {
       },
     },
     advanced: {
-      crossSubDomainCookies: {
-        enabled: true,
-      },
-      useSecureCookies: isProduction,
+      // Only use secure cookies in production on Vercel
+      useSecureCookies: isProduction && isVercel,
       // Important for Vercel serverless
       generateId: () => crypto.randomUUID(),
+      // Cookie settings for cross-origin requests
+      cookies: {
+        // sameSite: 'lax' works for localhost cross-port requests
+        // On production with HTTPS, this will work fine too
+        sameSite: isProduction && isVercel ? 'none' : 'lax',
+      },
     },
     user: {
       additionalFields: {
