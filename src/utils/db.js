@@ -3,57 +3,76 @@ import config from '../config/index.js';
 
 const { Pool } = pg;
 
-let pool;
+let pool = null;
 
-const connectDb = async () => {
-  if (pool) {
-    return pool; // Return existing pool if already connected
-  }
-
+/**
+ * Initialize and return a PostgreSQL connection pool
+ * Uses connection pooling for better performance in serverless environments
+ */
+export const connectDb = async () => {
   try {
+    if (pool) {
+      console.log('📦 Using existing database pool');
+      return pool;
+    }
+
+    if (!config.db.connectionString) {
+      throw new Error('DATABASE_URL is not configured in environment variables');
+    }
+
     pool = new Pool({
       connectionString: config.db.connectionString,
-      // Add connection pool settings for better stability
-      max: 20, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-      connectionTimeoutMillis: 10000, // How long to wait when connecting a new client
-    });
-
-    // Add error handler to prevent crashes
-    pool.on('error', (err, client) => {
-      console.error('Unexpected database pool error:', err);
-      // Don't crash the server - just log the error
+      // Optimized for Vercel serverless environment
+      max: 10, // Maximum pool size
+      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+      connectionTimeoutMillis: 10000, // Timeout after 10 seconds
+      ssl: {
+        rejectUnauthorized: false // Required for Neon and most cloud PostgreSQL providers
+      }
     });
 
     // Test the connection
     const client = await pool.connect();
-    console.log('Connected to PostgreSQL database.');
-    client.release(); // Release the test client back to the pool
+    console.log('✅ PostgreSQL database connected successfully');
+
+    // Check database version
+    const result = await client.query('SELECT version()');
+    console.log('📊 PostgreSQL version:', result.rows[0].version.split(' ')[0] + ' ' + result.rows[0].version.split(' ')[1]);
+
+    client.release();
+
+    // Handle pool errors
+    pool.on('error', (err) => {
+      console.error('❌ Unexpected database pool error:', err);
+    });
 
     return pool;
   } catch (error) {
-    console.error('Failed to connect to PostgreSQL database:', error);
-    // Depending on the application, you might want to re-throw or handle this gracefully.
-    // For now, we'll let it try to connect on next call or fail if critical.
-    pool = null; // Reset pool if connection failed
+    console.error('❌ Database connection failed:', error.message);
     throw error;
   }
 };
 
-const getDbPool = () => {
+/**
+ * Get the existing database pool
+ * @returns {Pool} PostgreSQL pool instance
+ */
+export const getDbPool = () => {
   if (!pool) {
-    console.warn('Database pool not initialized. Call connectDb() first.');
+    console.warn('⚠️ Database pool not initialized. Call connectDb() first.');
   }
   return pool;
 };
 
-// Exporting query function for convenience
-const query = (text, params) => {
-  const currentPool = getDbPool();
-  if (!currentPool) {
-    throw new Error('Database pool is not available. Cannot execute query.');
+/**
+ * Close the database pool (useful for graceful shutdown)
+ */
+export const closeDb = async () => {
+  if (pool) {
+    await pool.end();
+    pool = null;
+    console.log('🔌 Database connection pool closed');
   }
-  return currentPool.query(text, params);
 };
 
-export { connectDb, getDbPool, query };
+export default { connectDb, getDbPool, closeDb };

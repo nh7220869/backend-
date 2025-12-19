@@ -1,133 +1,94 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import config from '../config/index.js';
-import { callOpenRouterEmbeddings } from './openRouterApi.js';
-import pkg from '@dqbd/tiktoken'; // For tokenization if needed for chunking
-const { encoding_for_model } = pkg;
 
-const qdrantConfig = config.qdrant;
+let qdrantClient = null;
 
-let qdrantClient;
-const QDRANT_COLLECTION_NAME = qdrantConfig.collectionName;
-const EMBEDDING_MODEL = config.openRouter.embeddingModel; // Assuming OpenRouter will provide embeddings
-
-const initializeQdrantClient = async () => {
-  if (qdrantClient) {
-    console.log('✅ Qdrant client already initialized');
-    return qdrantClient;
-  }
-
-  console.log('🔍 Initializing Qdrant client...');
-  console.log('📍 Qdrant URL:', qdrantConfig.url || 'NOT SET');
-  console.log('🔑 Qdrant API Key:', qdrantConfig.apiKey ? '***' + qdrantConfig.apiKey.slice(-4) : 'NOT SET');
-
-  if (!qdrantConfig.url) {
-    throw new Error('QDRANT_URL environment variable is not set');
-  }
-
-  if (!qdrantConfig.apiKey) {
-    throw new Error('QDRANT_API_KEY environment variable is not set');
-  }
-
-  qdrantClient = new QdrantClient({
-    url: qdrantConfig.url,
-    apiKey: qdrantConfig.apiKey,
-  });
-
+/**
+ * Initialize Qdrant vector database client
+ * Used for RAG (Retrieval-Augmented Generation) functionality
+ */
+export const initializeQdrantClient = async () => {
   try {
-    console.log('📡 Connecting to Qdrant...');
-    const collections = await qdrantClient.getCollections();
-    const collectionExists = collections.collections.some(c => c.name === QDRANT_COLLECTION_NAME);
-
-    if (!collectionExists) {
-      console.log(`⚠️ Collection '${QDRANT_COLLECTION_NAME}' does not exist. Creating...`);
-      await qdrantClient.createCollection(QDRANT_COLLECTION_NAME, {
-        vectors: { size: 1536, distance: 'Cosine' },
-      });
-      console.log(`✅ Collection '${QDRANT_COLLECTION_NAME}' created.`);
-    } else {
-      console.log(`✅ Collection '${QDRANT_COLLECTION_NAME}' already exists.`);
+    if (qdrantClient) {
+      console.log('📦 Using existing Qdrant client');
+      return qdrantClient;
     }
+
+    if (!config.qdrant.url) {
+      console.warn('⚠️ QDRANT_URL not configured. Qdrant features will be disabled.');
+      return null;
+    }
+
+    // Initialize Qdrant client
+    qdrantClient = new QdrantClient({
+      url: config.qdrant.url,
+      apiKey: config.qdrant.apiKey,
+    });
+
+    // Test connection by checking if collections exist
+    try {
+      const collections = await qdrantClient.getCollections();
+      console.log('✅ Qdrant vector database connected successfully');
+      console.log(`📊 Available collections: ${collections.collections.length}`);
+
+      // Check if our specific collection exists
+      const collectionExists = collections.collections.some(
+        (col) => col.name === config.qdrant.collectionName
+      );
+
+      if (collectionExists) {
+        const collectionInfo = await qdrantClient.getCollection(config.qdrant.collectionName);
+        console.log(`✅ Collection '${config.qdrant.collectionName}' found with ${collectionInfo.points_count} vectors`);
+      } else {
+        console.warn(`⚠️ Collection '${config.qdrant.collectionName}' not found. RAG features may not work until collection is created.`);
+      }
+    } catch (testError) {
+      console.warn('⚠️ Could not verify Qdrant collections:', testError.message);
+    }
+
     return qdrantClient;
   } catch (error) {
-    console.error('❌ Failed to initialize Qdrant client:', error.message);
-    console.error('Stack:', error.stack);
-    qdrantClient = null;
-    throw new Error(`Qdrant initialization failed: ${error.message}`);
+    console.error('❌ Qdrant initialization failed:', error.message);
+    // Don't throw - allow the server to start even if Qdrant fails
+    // This makes RAG features optional
+    return null;
   }
 };
 
-const getQdrantClient = () => {
+/**
+ * Get the existing Qdrant client instance
+ * @returns {QdrantClient|null} Qdrant client or null if not initialized
+ */
+export const getQdrantClient = () => {
   if (!qdrantClient) {
-    console.warn('Qdrant client not initialized. Call initializeQdrantClient() first.');
+    console.warn('⚠️ Qdrant client not initialized. Call initializeQdrantClient() first.');
   }
   return qdrantClient;
 };
 
-// Function to generate embedding for a given text
-const generateEmbedding = async (text) => {
-  try {
-    const embedding = await callOpenRouterEmbeddings(text, EMBEDDING_MODEL);
-    return embedding;
-  } catch (error) {
-    console.error('Error generating embedding:', error);
-    throw error;
-  }
-};
-
-// Function to ingest content into Qdrant (simplified for demonstration)
-const ingestContent = async (id, text, metadata = {}) => {
-  const client = getQdrantClient();
-  if (!client) {
-    throw new Error('Qdrant client not available.');
+/**
+ * Search for similar vectors in the collection
+ * @param {number[]} embedding - Vector embedding to search for
+ * @param {number} limit - Number of results to return
+ * @returns {Promise<Array>} Search results
+ */
+export const searchSimilarVectors = async (embedding, limit = 5) => {
+  if (!qdrantClient) {
+    throw new Error('Qdrant client not initialized');
   }
 
   try {
-    const embedding = await generateEmbedding(text);
-    if (!embedding) {
-      throw new Error('Failed to generate embedding for content.');
-    }
-
-    await client.upsert(QDRANT_COLLECTION_NAME, {
-      wait: true,
-      points: [
-        {
-          id: id,
-          vector: embedding,
-          payload: { text, ...metadata },
-        },
-      ],
-    });
-    console.log(`Content with id ${id} ingested into Qdrant.`);
-  } catch (error) {
-    console.error(`Error ingesting content with id ${id} into Qdrant:`, error);
-    throw error;
-  }
-};
-
-// Function to search Qdrant
-const searchQdrant = async (queryText, limit = 5) => {
-  const client = getQdrantClient();
-  if (!client) {
-    throw new Error('Qdrant client not available.');
-  }
-
-  try {
-    const queryEmbedding = await generateEmbedding(queryText);
-    if (!queryEmbedding) {
-      throw new Error('Failed to generate embedding for query.');
-    }
-
-    const searchResult = await client.search(QDRANT_COLLECTION_NAME, {
-      vector: queryEmbedding,
-      limit: limit,
+    const searchResult = await qdrantClient.search(config.qdrant.collectionName, {
+      vector: embedding,
+      limit,
       with_payload: true,
     });
+
     return searchResult;
   } catch (error) {
-    console.error(`Error searching Qdrant for query '${queryText}':`, error);
+    console.error('❌ Qdrant search failed:', error.message);
     throw error;
   }
 };
 
-
-export { initializeQdrantClient, getQdrantClient, generateEmbedding, ingestContent, searchQdrant, QDRANT_COLLECTION_NAME };
+export default { initializeQdrantClient, getQdrantClient, searchSimilarVectors };

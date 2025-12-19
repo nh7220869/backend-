@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 // Import database and Qdrant utility functions
-import { connectDb, getDbPool } from './utils/db.js';
+import { connectDb} from './utils/db.js';
 import { initializeQdrantClient } from './utils/qdrantClient.js';
 import config from './config/index.js'; // Import config to use CORS allowed origins
 
