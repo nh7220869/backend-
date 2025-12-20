@@ -25,9 +25,14 @@ const createAuthRouter = (auth) => {
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
 
+      // Log request for debugging
+      console.log('[get-session] Request received from origin:', req.headers.origin);
+      console.log('[get-session] Cookies:', req.headers.cookie);
+
       const session = await auth.api.getSession({ headers: req.headers });
 
       if (!session) {
+        console.log('[get-session] No session found');
         return res.json({
           success: false,
           session: null,
@@ -35,12 +40,13 @@ const createAuthRouter = (auth) => {
         });
       }
 
+      console.log('[get-session] Session found for user:', session.user?.email);
       return res.json({
         success: true,
         session: session
       });
     } catch (error) {
-      console.error('Error getting session:', error);
+      console.error('[get-session] Error getting session:', error);
       return res.status(500).json({
         success: false,
         session: null,

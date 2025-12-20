@@ -50,6 +50,38 @@ if (process.env.VERCEL !== '1') {
 ======================================================== */
 export default async function handler(req, res) {
     try {
+        // CRITICAL: Set CORS headers BEFORE any processing for Vercel serverless
+        // This ensures headers are set even if app middleware doesn't run properly
+        const origin = req.headers.origin;
+        const allowedOrigins = [
+            'https://ai-native-book-tf39.vercel.app',
+            'https://Ai-Native-Book.vercel.app',
+            'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
+            'http://localhost:3000',
+            'http://localhost:5001',
+            'http://localhost:3001'
+        ];
+
+        // Check if origin matches (including wildcards)
+        const isAllowed = origin && (
+            allowedOrigins.includes(origin) ||
+            /^https:\/\/ai-native-book-[^.]*\.vercel\.app$/.test(origin)
+        );
+
+        if (isAllowed) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cookie');
+            res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
+            res.setHeader('Access-Control-Max-Age', '86400');
+        }
+
+        // Handle preflight OPTIONS request
+        if (req.method === 'OPTIONS') {
+            return res.status(204).end();
+        }
+
         await initOnce();
         return app(req, res);
     } catch (err) {

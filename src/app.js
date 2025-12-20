@@ -8,6 +8,9 @@ import { connectDb} from './utils/db.js';
 import { initializeQdrantClient } from './utils/qdrantClient.js';
 import config from './config/index.js'; // Import config to use CORS allowed origins
 
+// Import CORS configuration with wildcard support
+import { corsOptions, corsMiddleware } from './middleware/corsConfig.js';
+
 // Import auth initialization and route creator
 import { initializeAuth } from './utils/authService.js';
 import createAuthRouter from './routes/auth.js'; // Changed to import createAuthRouter
@@ -22,17 +25,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Apply CORS middleware with enhanced configuration for cross-domain cookies
-app.use(cors({
-  origin: config.cors.allowedOrigins,
-  credentials: true, // CRITICAL: Allow cookies to be sent cross-domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Set-Cookie'], // Expose Set-Cookie header to the client
-  maxAge: 86400, // Cache preflight requests for 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+// Apply CORS middleware with dynamic origin matching and wildcard support
+app.use(cors(corsOptions));
+
+// Backup CORS headers (ensures headers are set even if cors package fails)
+app.use(corsMiddleware);
 
 // Parse JSON bodies
 app.use(express.json());
