@@ -26,14 +26,31 @@ const config = {
   },
   cors: {
     allowedOrigins: [
+<<<<<<< HEAD
       'https://ai-native-book-tf39.vercel.app',
       'https://ai-native-book-*.vercel.app',
+=======
+      'https://ai-native-book-tf39.vercel.app', // Removed trailing slash
+>>>>>>> 83f8880116f5ce476d9f6e1343feb51000122538
       'https://Ai-Native-Book.vercel.app',
       'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
       'http://localhost:3000',
       'http://localhost:5001',
       'http://localhost:3001'
     ],
+    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers'
+    ],
+    exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400, // 24 hours in seconds
   }
 };
 
