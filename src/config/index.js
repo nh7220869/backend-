@@ -18,25 +18,36 @@ const config = {
     apiKey: process.env.OPENROUTER_API_KEY,
     baseUrl: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
     chatModel: process.env.OPENROUTER_CHAT_MODEL || 'google/gemini-2.0-flash-exp:free',
-    embeddingModel: process.env.OPENROUTER_EMBEDDING_MODEL || 'openai/text-embedding-ada-002' // Assuming OpenRouter can provide embeddings
+    embeddingModel: process.env.OPENROUTER_EMBEDDING_MODEL || 'openai/text-embedding-ada-002'
   },
   qdrant: {
     url: process.env.QDRANT_URL || 'http://localhost:6333',
     apiKey: process.env.QDRANT_API_KEY,
     collectionName: process.env.QDRANT_COLLECTION_NAME || 'book_content',
   },
-cors: {
-  allowedOrigins: [
-    'https://Ai-Native-Book.vercel.app',
-    'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
-    'http://localhost:3000',
-    'https://ai-native-book-tf39.vercel.app',
-    'http://localhost:5001',
-    'http://localhost:3001'
-  ],
-},
-
-
+  cors: {
+    allowedOrigins: [
+      'https://ai-native-book-tf39.vercel.app', // Removed trailing slash
+      'https://Ai-Native-Book.vercel.app',
+      'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5001',
+      'http://localhost:3001'
+    ],
+    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers'
+    ],
+    exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400, // 24 hours in seconds
+  }
 };
 
 // Validate essential configurations
