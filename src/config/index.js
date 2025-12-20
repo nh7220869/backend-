@@ -31,6 +31,7 @@ cors: {
     'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
     'http://localhost:3000',
     'https://ai-native-book-tf39.vercel.app',
+    "https://ai-native-book-tf39.vercel.app/",
     'http://localhost:5001',
     'http://localhost:3001'
   ],
