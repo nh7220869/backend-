@@ -42,20 +42,13 @@ if (process.env.VERCEL !== '1') {
 export default async function handler(req, res) {
     const origin = req.headers.origin;
     const allowedOrigins = [
-        'https://physical-ai-humanoid-robotics-book-eight-kappa.vercel.app',
-        'https://ai-native-book-tf39.vercel.app',
-        'https://Ai-Native-Book.vercel.app',
-        'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
+        'https://physical-ai-humanoid-robotics-book-lake-kappa.vercel.app',
         'http://localhost:3000',
         'http://localhost:5001',
         'http://localhost:3001'
     ];
 
-    const isAllowed = origin && (
-        allowedOrigins.includes(origin) ||
-        /^https:\/\/ai-native-book-[^.]*\.vercel\.app$/.test(origin) ||
-        /^https:\/\/physical-ai-humanoid-robotics-book-[^.]*\.vercel\.app$/.test(origin)
-    );
+    const isAllowed = origin && allowedOrigins.includes(origin);
 
     if (isAllowed) {
         res.setHeader('Access-Control-Allow-Origin', origin);

@@ -25,11 +25,7 @@ const config = {
   },
   cors: {
     allowedOrigins: [
-      'https://physical-ai-humanoid-robotics-book-eight-kappa.vercel.app',
-      'https://ai-native-book-tf39.vercel.app',
-      'https://ai-native-book-*.vercel.app',
-      'https://Ai-Native-Book.vercel.app',
-      'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
+      'https://physical-ai-humanoid-robotics-book-lake-kappa.vercel.app',
       'http://localhost:3000',
       'http://localhost:5001',
       'http://localhost:3001'
