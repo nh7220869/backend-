@@ -43,6 +43,7 @@ export default async function handler(req, res) {
     const origin = req.headers.origin;
     const allowedOrigins = [
         'https://physical-ai-humanoid-robotics-book-lake-kappa.vercel.app',
+        'https://physical-ai-humanoid-robotics-book-green-ten.vercel.app',
         'http://localhost:3000',
         'http://localhost:5001',
         'http://localhost:3001'
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cookie');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cookie, Cache-Control, Pragma, Expires');
         res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
         res.setHeader('Access-Control-Max-Age', '86400');
     }
