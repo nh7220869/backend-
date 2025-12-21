@@ -1,0 +1,23 @@
+{
+  "name": "central-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "frontend-api-example.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nh7220869/backend-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nh7220869/backend-/issues"
+  },
+  "homepage": "https://github.com/nh7220869/backend-#readme"
+}
