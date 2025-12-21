@@ -80,6 +80,7 @@ Please give a comprehensive explanation, not just a brief definition.`;
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ question: messageText, selected_text: null }),
       });
 

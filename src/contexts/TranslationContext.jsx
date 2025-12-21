@@ -88,6 +88,7 @@ export const TranslationProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           text: text,
           targetLanguage: targetLanguageName,

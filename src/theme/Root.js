@@ -58,6 +58,7 @@ function Root({ children }) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           text: selectedText,
           targetLanguage: 'Urdu',

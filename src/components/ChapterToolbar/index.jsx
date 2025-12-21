@@ -64,6 +64,7 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           content: content.substring(0, 8000),
           userBackground: {
@@ -126,6 +127,7 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           text: content.substring(0, 8000),
           targetLanguage: 'Urdu',
