@@ -3,16 +3,23 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'https://physical-ai-humanoid-robotics-book-eight-kappa.vercel.app',
+  credentials: true
+}));
+
+app.options('*', cors());
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load env (safe for both local & Vercel)
-// Note: config/index.js also loads .env, which runs first due to import order
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const PORT = process.env.PORT || 3001;
 
-// Initialize services only once
 let servicesInitialized = false;
 
 const initOnce = async () => {
@@ -24,9 +31,6 @@ const initOnce = async () => {
     }
 };
 
-/* ========================================================
-     LOCAL DEVELOPMENT
-======================================================== */
 if (process.env.VERCEL !== '1') {
     (async () => {
         try {
@@ -45,15 +49,11 @@ if (process.env.VERCEL !== '1') {
     })();
 }
 
-/* ========================================================
-     VERCEL SERVERLESS EXPORT
-======================================================== */
 export default async function handler(req, res) {
     try {
-        // CRITICAL: Set CORS headers BEFORE any processing for Vercel serverless
-        // This ensures headers are set even if app middleware doesn't run properly
         const origin = req.headers.origin;
         const allowedOrigins = [
+            'https://physical-ai-humanoid-robotics-book-eight-kappa.vercel.app',
             'https://ai-native-book-tf39.vercel.app',
             'https://Ai-Native-Book.vercel.app',
             'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
@@ -62,10 +62,10 @@ export default async function handler(req, res) {
             'http://localhost:3001'
         ];
 
-        // Check if origin matches (including wildcards)
         const isAllowed = origin && (
             allowedOrigins.includes(origin) ||
-            /^https:\/\/ai-native-book-[^.]*\.vercel\.app$/.test(origin)
+            /^https:\/\/ai-native-book-[^.]*\.vercel\.app$/.test(origin) ||
+            /^https:\/\/physical-ai-humanoid-robotics-book-[^.]*\.vercel\.app$/.test(origin)
         );
 
         if (isAllowed) {
@@ -77,7 +77,6 @@ export default async function handler(req, res) {
             res.setHeader('Access-Control-Max-Age', '86400');
         }
 
-        // Handle preflight OPTIONS request
         if (req.method === 'OPTIONS') {
             return res.status(204).end();
         }

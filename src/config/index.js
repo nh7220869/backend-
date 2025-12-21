@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env from project root
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const config = {
@@ -26,12 +25,9 @@ const config = {
   },
   cors: {
     allowedOrigins: [
-<<<<<<< HEAD
+      'https://physical-ai-humanoid-robotics-book-eight-kappa.vercel.app',
       'https://ai-native-book-tf39.vercel.app',
       'https://ai-native-book-*.vercel.app',
-=======
-      'https://ai-native-book-tf39.vercel.app', // Removed trailing slash
->>>>>>> 83f8880116f5ce476d9f6e1343feb51000122538
       'https://Ai-Native-Book.vercel.app',
       'https://physical-ai-humanoid-robotics-book-eosin.vercel.app',
       'http://localhost:3000',
@@ -45,16 +41,16 @@ const config = {
       'X-Requested-With',
       'Accept',
       'Origin',
+      'Cookie',
       'Access-Control-Request-Method',
       'Access-Control-Request-Headers'
     ],
-    exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie'],
     credentials: true,
-    maxAge: 86400, // 24 hours in seconds
+    maxAge: 86400,
   }
 };
 
-// Validate essential configurations
 if (!config.db.connectionString) {
   console.warn('WARNING: DATABASE_URL is not set. Database functionalities might be limited.');
 }
