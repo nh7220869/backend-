@@ -19,7 +19,7 @@ export const useApiConfig = () => {
   const { siteConfig } = useDocusaurusContext();
 
   // Remove trailing slash to ensure consistent URL formatting
-  let baseUrl = siteConfig.customFields?.apiBaseUrl || 'https://backend-jada-radta.vercel.app';
+  let baseUrl = siteConfig.customFields?.apiBaseUrl || 'https://huggingface.co/spaces/noorulsehar/physical-ai-humanoid-robotics-book-backend';
   baseUrl = baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
 
   return {
@@ -61,11 +61,11 @@ export const getApiBaseUrl = () => {
       baseUrl = window.docusaurus.siteConfig.customFields.apiBaseUrl;
     } else {
       // Fallback to production URL
-      baseUrl = 'https://backend-jada-radta.vercel.app';
+      baseUrl = 'https://huggingface.co/spaces/noorulsehar/physical-ai-humanoid-robotics-book-backend';
     }
   } else {
     // Server-side or build-time - this won't execute in browser
-    baseUrl = 'https://backend-jada-radta.vercel.app';
+    baseUrl = 'https://huggingface.co/spaces/noorulsehar/physical-ai-humanoid-robotics-book-backend';
   }
 
   // Remove trailing slashes for consistency
