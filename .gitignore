@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 /node_modules
 
@@ -24,3 +25,7 @@ yarn-error.log*
 # Vercel
 .vercel
 /central-backend
+=======
+.vercel
+.env*.local
+>>>>>>> 83a656cb579c730b9402d977c1cb1d7add2763d5

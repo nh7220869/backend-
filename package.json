@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "physical-ai-book",
   "version": "0.0.0",
   "private": true,
@@ -53,4 +54,27 @@
   "engines": {
     "node": ">=20.0"
   }
+=======
+  "name": "central-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "frontend-api-example.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nh7220869/backend-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nh7220869/backend-/issues"
+  },
+  "homepage": "https://github.com/nh7220869/backend-#readme"
+>>>>>>> 83a656cb579c730b9402d977c1cb1d7add2763d5
 }

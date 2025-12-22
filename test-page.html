@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel Backend API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .response.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .response.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-badge.authenticated {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.unauthenticated {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        #session-status {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #1976D2;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Vercel Backend API Tester</h1>
+            <p>Testing: https://backend-jada-radta.vercel.app</p>
+        </div>
+
+        <div class="content">
+            <div id="session-status">
+                <span id="status-text">Checking session...</span>
+            </div>
+
+            <div class="info-box">
+                <h3>ℹ️ Important Notes</h3>
+                <p>
+                    • This page tests your Vercel backend APIs with proper credentials handling<br>
+                    • Cookies are automatically managed for authentication<br>
+                    • All requests include CORS credentials<br>
+                    • Check browser console (F12) for detailed logs
+                </p>
+            </div>
+
+            <div class="quick-actions">
+                <button onclick="checkHealth()">🏥 Health Check</button>
+                <button onclick="checkAuthHealth()">🔐 Auth Health</button>
+            </div>
+
+            <div class="section">
+                <h2>
+                    <span class="section-number">1</span>
+                    Sign Up
+                </h2>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" placeholder="your@email.com" value="test@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" placeholder="Minimum 8 characters" value="TestPassword123!">
+                </div>
+                <div class="input-group">
+                    <label>Name</label>
+                    <input type="text" id="signup-name" placeholder="Your Name" value="Test User">
+                </div>
+                <button onclick="signUp()">Create Account</button>
+                <div id="signup-response" class="response"></div>
+            </div>
+
+            <div class="section">
+                <h2>
+                    <span class="section-number">2</span>
+                    Sign In
+                </h2>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="signin-email" placeholder="your@email.com" value="test@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signin-password" placeholder="Your password" value="TestPassword123!">
+                </div>
+                <button onclick="signIn()">Sign In</button>
+                <div id="signin-response" class="response"></div>
+            </div>
+
+            <div class="section">
+                <h2>
+                    <span class="section-number">3</span>
+                    Get Session
+                </h2>
+                <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                    Retrieves your current session information. Returns null if not logged in.
+                </p>
+                <button onclick="getSession()">Check Session</button>
+                <div id="session-response" class="response"></div>
+            </div>
+
+            <div class="section">
+                <h2>
+                    <span class="section-number">4</span>
+                    Sign Out
+                </h2>
+                <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                    Logs you out and clears your session.
+                </p>
+                <button onclick="signOut()">Sign Out</button>
+                <div id="signout-response" class="response"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://backend-jada-radta.vercel.app';
+
+        async function makeRequest(endpoint, options = {}) {
+            const url = `${BASE_URL}${endpoint}`;
+
+            try {
+                console.log(`→ ${options.method || 'GET'} ${endpoint}`);
+
+                const response = await fetch(url, {
+                    ...options,
+                    credentials: 'include',  // CRITICAL for cookies
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                console.log(`← Status: ${response.status}`, data);
+
+                return { response, data, ok: response.ok };
+            } catch (error) {
+                console.error('Request failed:', error);
+                return { error, ok: false };
+            }
+        }
+
+        function showResponse(elementId, result, message = '') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+
+            if (result.ok) {
+                element.className = 'response success';
+                element.textContent = message || '✓ Success\n\n' + JSON.stringify(result.data, null, 2);
+            } else if (result.error) {
+                element.className = 'response error';
+                element.textContent = '✗ Error: ' + result.error.message;
+            } else {
+                element.className = 'response error';
+                element.textContent = '✗ Failed\n\n' + JSON.stringify(result.data, null, 2);
+            }
+        }
+
+        async function updateSessionStatus() {
+            const result = await makeRequest('/api/auth/session');
+            const statusElement = document.getElementById('status-text');
+
+            if (result.ok && result.data?.user) {
+                statusElement.innerHTML = `
+                    Logged in as: <strong>${result.data.user.email}</strong>
+                    <span class="status-badge authenticated">Authenticated</span>
+                `;
+            } else {
+                statusElement.innerHTML = `
+                    Not logged in
+                    <span class="status-badge unauthenticated">Unauthenticated</span>
+                `;
+            }
+        }
+
+        async function checkHealth() {
+            const result = await makeRequest('/health');
+            alert(result.ok ? '✓ Health check passed!' : '✗ Health check failed!');
+        }
+
+        async function checkAuthHealth() {
+            const result = await makeRequest('/api/auth/auth-health');
+            alert(result.ok ? '✓ Auth health check passed!' : '✗ Auth health check failed!');
+        }
+
+        async function signUp() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const name = document.getElementById('signup-name').value;
+
+            if (!email || !password || !name) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const result = await makeRequest('/api/auth/sign-up/email', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email,
+                    password,
+                    name,
+                    softwareBackground: 'JavaScript, Node.js',
+                    hardwareBackground: 'Arduino, ESP32',
+                    experienceLevel: 'intermediate'
+                })
+            });
+
+            showResponse('signup-response', result);
+            if (result.ok) {
+                await updateSessionStatus();
+                // Auto-fill sign in form
+                document.getElementById('signin-email').value = email;
+                document.getElementById('signin-password').value = password;
+            }
+        }
+
+        async function signIn() {
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+
+            if (!email || !password) {
+                alert('Please fill in email and password');
+                return;
+            }
+
+            const result = await makeRequest('/api/auth/sign-in/email', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+
+            showResponse('signin-response', result);
+            if (result.ok) {
+                await updateSessionStatus();
+            }
+        }
+
+        async function getSession() {
+            const result = await makeRequest('/api/auth/session');
+            showResponse('session-response', result);
+        }
+
+        async function signOut() {
+            const result = await makeRequest('/api/auth/sign-out', {
+                method: 'POST'
+            });
+
+            showResponse('signout-response', result);
+            if (result.ok) {
+                await updateSessionStatus();
+            }
+        }
+
+        // Check session on page load
+        window.addEventListener('load', () => {
+            updateSessionStatus();
+        });
+    </script>
+</body>
+</html>
