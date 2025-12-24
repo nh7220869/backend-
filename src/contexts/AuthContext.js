@@ -175,6 +175,12 @@ export const AuthProvider = ({ children }) => {
       // Extract JWT token from response (if present)
       const jwtToken = data?.token || data?.accessToken || data?.jwt;
 
+      // CRITICAL: Store JWT token IMMEDIATELY before any other API calls
+      if (jwtToken) {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, jwtToken);
+        console.log('✅ JWT token stored immediately after signup');
+      }
+
       // Set user and session from signup response
       if (data?.user) {
         setUser(data.user);
@@ -183,31 +189,31 @@ export const AuthProvider = ({ children }) => {
         setSession(data.session);
       }
 
-      // CRITICAL: Immediately call get-session API after successful signup
-      // This ensures the session is validated and cookies are properly set
+      // CRITICAL: Now call get-session API with token in headers
       console.log('✅ Signup successful, calling get-session API...');
       const { data: sessionData, error: sessionError } = await authClient.getSession();
 
       if (sessionData && !sessionError) {
         setSession(sessionData.session);
         setUser(sessionData.user);
-        // CRITICAL: Save to localStorage as backup (including JWT token)
+        // Save full session to localStorage as backup
         saveSessionToStorage(sessionData.session, sessionData.user, jwtToken);
         console.log('✅ Session validated via get-session API:', {
           userId: sessionData.user?.id,
           sessionId: sessionData.session?.id,
           hasToken: !!jwtToken,
+          emailVerified: sessionData.user?.emailVerified,
         });
       } else {
         console.warn('⚠️ get-session returned no data after signup');
-        // Still save the token even if get-session fails
+        // Still save the session data we have
         if (jwtToken) {
           saveSessionToStorage(data.session, data.user, jwtToken);
         }
       }
 
       setLoading(false);
-      return { success: true, user: data?.user };
+      return { success: true, user: sessionData?.user || data?.user };
     } catch (err) {
       console.error('Signup error:', err);
       const errorMessage = err.message || 'Network error or server unavailable';
@@ -238,6 +244,12 @@ export const AuthProvider = ({ children }) => {
       // Extract JWT token from response (if present)
       const jwtToken = data?.token || data?.accessToken || data?.jwt;
 
+      // CRITICAL: Store JWT token IMMEDIATELY before any other API calls
+      if (jwtToken) {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, jwtToken);
+        console.log('✅ JWT token stored immediately after login');
+      }
+
       // Set user and session from login response
       if (data?.user) {
         setUser(data.user);
@@ -246,32 +258,31 @@ export const AuthProvider = ({ children }) => {
         setSession(data.session);
       }
 
-      // CRITICAL: Immediately call get-session API after successful login
-      // This ensures the session is validated and cookies are properly set
-      // WITHOUT requiring a page reload
+      // CRITICAL: Now call get-session API with token in headers
       console.log('✅ Login successful, calling get-session API...');
       const { data: sessionData, error: sessionError } = await authClient.getSession();
 
       if (sessionData && !sessionError) {
         setSession(sessionData.session);
         setUser(sessionData.user);
-        // CRITICAL: Save to localStorage as backup (including JWT token)
+        // Save full session to localStorage as backup
         saveSessionToStorage(sessionData.session, sessionData.user, jwtToken);
         console.log('✅ Session validated via get-session API:', {
           userId: sessionData.user?.id,
           sessionId: sessionData.session?.id,
           hasToken: !!jwtToken,
+          emailVerified: sessionData.user?.emailVerified,
         });
       } else {
         console.warn('⚠️ get-session returned no data after login');
-        // Still save the token even if get-session fails
+        // Still save the session data we have
         if (jwtToken) {
           saveSessionToStorage(data.session, data.user, jwtToken);
         }
       }
 
       setLoading(false);
-      return { success: true, user: data?.user };
+      return { success: true, user: sessionData?.user || data?.user };
     } catch (err) {
       console.error('Login error:', err);
       const errorMessage = err.message || 'Network error or server unavailable';
@@ -337,6 +348,7 @@ export const AuthProvider = ({ children }) => {
     user,
     session,
     isAuthenticated: !!user && !!session,
+    emailVerified: user?.emailVerified || false,
     loading,
     error,
     login,

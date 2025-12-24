@@ -5,6 +5,7 @@ import TranslationModal from '@site/src/components/TranslationModal';
 import PageTranslator from '@site/src/components/PageTranslator';
 import ErrorBoundary from '@site/src/components/ErrorBoundary';
 import SessionDebug from '@site/src/components/SessionDebug';
+import EmailVerificationBanner from '@site/src/components/EmailVerificationBanner';
 import { AuthProvider } from '@site/src/contexts/AuthContext';
 import { TranslationProvider } from '@site/src/contexts/TranslationContext';
 import LoadingScreen from '@site/src/components/LoadingScreen';
@@ -102,6 +103,7 @@ function Root({ children }) {
         <TranslationProvider>
           {isLoading && <LoadingScreen />}
           <div style={{ display: isLoading ? 'none' : 'block' }}>
+            <EmailVerificationBanner />
             {children}
           </div>
           <PageTranslator />
