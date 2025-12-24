@@ -26,7 +26,7 @@ const config: Config = {
   customFields: {
     // Single source of truth for all API endpoints
     // Update API_BASE_URL in .env for local development or Vercel environment variables for production
-    apiBaseUrl: process.env.API_BASE_URL || 'https://huggingface.co/spaces/noorulsehar/physical-ai-humanoid-robotics-book-backend',
+    apiBaseUrl: process.env.API_BASE_URL || 'https://noorulsehar-physical-ai-humanoid-robotics-book-backend.hf.space',
   },
 
   presets: [

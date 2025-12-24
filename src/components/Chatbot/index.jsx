@@ -3,6 +3,7 @@ import React, { useState, useCallback, useRef, useEffect, forwardRef, useImperat
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApiConfig } from '../../config/api';
+import { authPostJson } from '../../utils/authFetch';
 
 
 const Chatbot = forwardRef((props, ref) => {
@@ -75,20 +76,12 @@ Please give a comprehensive explanation, not just a brief definition.`;
     setIsLoading(true);
 
     try {
-      const response = await fetch(RAG_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ question: messageText, selected_text: null }),
+      // Use authenticated fetch with JWT token
+      const data = await authPostJson(RAG_API_URL, {
+        question: messageText,
+        selected_text: null
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       const botMessage = { text: data.answer, sender: 'bot' };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {

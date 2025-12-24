@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from '@docusaurus/router';
 import openRouterRateLimiter from '@site/src/utils/rateLimiter';
 import { API_CONFIG } from '@site/src/config/api';
+import { authPostJson } from '@site/src/utils/authFetch';
 
 const TranslationContext = createContext();
 
@@ -83,34 +84,11 @@ export const TranslationProvider = ({ children }) => {
 
       console.log(`Translating: "${text.substring(0, 50)}..." to ${targetLanguageName}`);
 
-      const response = await fetch(API_CONFIG.ENDPOINTS.TRANSLATE_GEMINI, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          text: text,
-          targetLanguage: targetLanguageName,
-        }),
+      // Use authenticated fetch with JWT token
+      const data = await authPostJson(API_CONFIG.ENDPOINTS.TRANSLATE_GEMINI, {
+        text: text,
+        targetLanguage: targetLanguageName,
       });
-
-      const data = await response.json();
-
-      // Handle quota exceeded error
-      if (!response.ok) {
-        if (data.error && data.error.includes('Quota exceeded')) {
-          if (retries > 0) {
-            console.warn(`Quota exceeded, retrying in 16 seconds... (${retries} retries left)`);
-            await new Promise(resolve => setTimeout(resolve, 16000));
-            return translateText(text, targetLang, retries - 1);
-          } else {
-            console.error('Max retries reached for quota');
-            return text;
-          }
-        }
-        throw new Error(data.details || data.error || 'Translation failed');
-      }
 
       if (data.success && data.translatedText) {
         // Cache the translation
@@ -125,6 +103,20 @@ export const TranslationProvider = ({ children }) => {
       return text;
     } catch (error) {
       console.error('Translation error:', error.message);
+
+      // Handle quota exceeded error
+      if (error.message && error.message.includes('Quota exceeded')) {
+        if (retries > 0) {
+          console.warn(`Quota exceeded, retrying in 16 seconds... (${retries} retries left)`);
+          await new Promise(resolve => setTimeout(resolve, 16000));
+          return translateText(text, targetLang, retries - 1);
+        } else {
+          console.error('Max retries reached for quota');
+          return text;
+        }
+      }
+
+      // Retry on other errors
       if (retries > 0) {
         console.log(`Retrying... (${retries} retries left)`);
         await new Promise(resolve => setTimeout(resolve, 2000));

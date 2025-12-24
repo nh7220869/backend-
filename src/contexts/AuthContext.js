@@ -7,11 +7,12 @@ const AuthContext = createContext(null);
 const STORAGE_KEYS = {
   SESSION: 'ai_book_session',
   USER: 'ai_book_user',
-  TIMESTAMP: 'ai_book_session_timestamp'
+  TIMESTAMP: 'ai_book_session_timestamp',
+  TOKEN: 'ai_book_jwt_token'
 };
 
 // Helper: Save session to localStorage as backup
-const saveSessionToStorage = (session, user) => {
+const saveSessionToStorage = (session, user, token = null) => {
   if (typeof window === 'undefined') return;
 
   try {
@@ -19,6 +20,9 @@ const saveSessionToStorage = (session, user) => {
       localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(session));
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       localStorage.setItem(STORAGE_KEYS.TIMESTAMP, Date.now().toString());
+      if (token) {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      }
       console.log('💾 Session backed up to localStorage');
     }
   } catch (err) {
@@ -65,9 +69,22 @@ const clearSessionFromStorage = () => {
     localStorage.removeItem(STORAGE_KEYS.SESSION);
     localStorage.removeItem(STORAGE_KEYS.USER);
     localStorage.removeItem(STORAGE_KEYS.TIMESTAMP);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     console.log('🗑️ Session cleared from localStorage');
   } catch (err) {
     console.warn('Failed to clear session from localStorage:', err);
+  }
+};
+
+// Helper: Get stored JWT token
+export const getAuthToken = () => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    return localStorage.getItem(STORAGE_KEYS.TOKEN);
+  } catch (err) {
+    console.warn('Failed to get token from localStorage:', err);
+    return null;
   }
 };
 
@@ -155,6 +172,9 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: errorMessage };
       }
 
+      // Extract JWT token from response (if present)
+      const jwtToken = data?.token || data?.accessToken || data?.jwt;
+
       // Set user and session from signup response
       if (data?.user) {
         setUser(data.user);
@@ -171,14 +191,19 @@ export const AuthProvider = ({ children }) => {
       if (sessionData && !sessionError) {
         setSession(sessionData.session);
         setUser(sessionData.user);
-        // CRITICAL: Save to localStorage as backup
-        saveSessionToStorage(sessionData.session, sessionData.user);
+        // CRITICAL: Save to localStorage as backup (including JWT token)
+        saveSessionToStorage(sessionData.session, sessionData.user, jwtToken);
         console.log('✅ Session validated via get-session API:', {
           userId: sessionData.user?.id,
           sessionId: sessionData.session?.id,
+          hasToken: !!jwtToken,
         });
       } else {
         console.warn('⚠️ get-session returned no data after signup');
+        // Still save the token even if get-session fails
+        if (jwtToken) {
+          saveSessionToStorage(data.session, data.user, jwtToken);
+        }
       }
 
       setLoading(false);
@@ -210,6 +235,9 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: errorMessage };
       }
 
+      // Extract JWT token from response (if present)
+      const jwtToken = data?.token || data?.accessToken || data?.jwt;
+
       // Set user and session from login response
       if (data?.user) {
         setUser(data.user);
@@ -227,14 +255,19 @@ export const AuthProvider = ({ children }) => {
       if (sessionData && !sessionError) {
         setSession(sessionData.session);
         setUser(sessionData.user);
-        // CRITICAL: Save to localStorage as backup
-        saveSessionToStorage(sessionData.session, sessionData.user);
+        // CRITICAL: Save to localStorage as backup (including JWT token)
+        saveSessionToStorage(sessionData.session, sessionData.user, jwtToken);
         console.log('✅ Session validated via get-session API:', {
           userId: sessionData.user?.id,
           sessionId: sessionData.session?.id,
+          hasToken: !!jwtToken,
         });
       } else {
         console.warn('⚠️ get-session returned no data after login');
+        // Still save the token even if get-session fails
+        if (jwtToken) {
+          saveSessionToStorage(data.session, data.user, jwtToken);
+        }
       }
 
       setLoading(false);

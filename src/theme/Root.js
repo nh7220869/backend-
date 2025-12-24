@@ -9,6 +9,7 @@ import { AuthProvider } from '@site/src/contexts/AuthContext';
 import { TranslationProvider } from '@site/src/contexts/TranslationContext';
 import LoadingScreen from '@site/src/components/LoadingScreen';
 import { useApiConfig } from '@site/src/config/api';
+import { authPostJson } from '@site/src/utils/authFetch';
 
 // Default implementation, that you can customize
 function Root({ children }) {
@@ -52,25 +53,11 @@ function Root({ children }) {
     });
 
     try {
-      // Call Gemini translation backend
-      const response = await fetch(apiConfig.ENDPOINTS.TRANSLATE_GEMINI, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          text: selectedText,
-          targetLanguage: 'Urdu',
-        }),
+      // Call Gemini translation backend with JWT token
+      const data = await authPostJson(apiConfig.ENDPOINTS.TRANSLATE_GEMINI, {
+        text: selectedText,
+        targetLanguage: 'Urdu',
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || 'Translation failed');
-      }
-
-      const data = await response.json();
 
       if (data.success && data.translatedText) {
         setTranslationModal({

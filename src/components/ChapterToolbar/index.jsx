@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApiConfig } from '../../config/api';
+import { authPostJson } from '../../utils/authFetch';
 // import './ChapterToolbar.css';
 
 
@@ -59,34 +60,15 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
     }
 
     try {
-      const response = await fetch(apiConfig.ENDPOINTS.PERSONALIZE, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Use authenticated fetch with JWT token
+      const data = await authPostJson(apiConfig.ENDPOINTS.PERSONALIZE, {
+        content: content.substring(0, 8000),
+        userBackground: {
+          softwareBackground: user?.softwareBackground || '',
+          hardwareBackground: user?.hardwareBackground || '',
+          experienceLevel: user?.experienceLevel || 'beginner',
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          content: content.substring(0, 8000),
-          userBackground: {
-            softwareBackground: user?.softwareBackground || '',
-            hardwareBackground: user?.hardwareBackground || '',
-            experienceLevel: user?.experienceLevel || 'beginner',
-          },
-        }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Personalization service not found. Please ensure the backend is running.');
-        } else if (data.message) {
-          setError(data.message);
-        } else {
-          setError('Personalization failed. Please try again.');
-        }
-        return;
-      }
 
       if (data.success === false) {
         setError(data.message || 'Personalization failed.');
@@ -96,12 +78,14 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
       setPersonalizedContent(data.personalizedContent || data.content);
     } catch (err) {
       console.error('Personalization error:', err);
-      if (err instanceof TypeError || err.message?.includes('fetch') || err.message?.includes('network')) {
+      if (err.message?.includes('404')) {
+        setError('Personalization service not found. Please ensure the backend is running.');
+      } else if (err instanceof TypeError || err.message?.includes('fetch') || err.message?.includes('network')) {
         setError('Cannot connect to backend server. Please ensure the central backend is running on port 3000.');
       } else if (err instanceof SyntaxError) {
         setError('Invalid response from server. The backend may not be running correctly.');
       } else {
-        setError('Failed to personalize content. Please try again.');
+        setError(err.message || 'Failed to personalize content. Please try again.');
       }
     } finally {
       setIsPersonalizing(false);
@@ -122,30 +106,11 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
     }
 
     try {
-      const response = await fetch(apiConfig.ENDPOINTS.TRANSLATE_GEMINI, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          text: content.substring(0, 8000),
-          targetLanguage: 'Urdu',
-        }),
+      // Use authenticated fetch with JWT token
+      const data = await authPostJson(apiConfig.ENDPOINTS.TRANSLATE_GEMINI, {
+        text: content.substring(0, 8000),
+        targetLanguage: 'Urdu',
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Translation service not found. Please ensure the backend is running.');
-        } else if (data.message) {
-          setError(data.message);
-        } else {
-          setError('Translation failed. Please try again.');
-        }
-        return;
-      }
 
       if (data.success && data.translatedText) {
         setTranslatedContent(data.translatedText);
@@ -154,10 +119,12 @@ const ChapterToolbar = ({ chapterContent, chapterTitle }) => {
       }
     } catch (err) {
       console.error('Translation error:', err);
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      if (err.message?.includes('404')) {
+        setError('Translation service not found. Please ensure the backend is running.');
+      } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
         setError('Cannot connect to backend server. Please check if the central backend is running on port 3000.');
       } else {
-        setError('Failed to translate content. Please try again.');
+        setError(err.message || 'Failed to translate content. Please try again.');
       }
     } finally {
       setIsTranslating(false);
